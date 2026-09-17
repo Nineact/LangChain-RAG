@@ -1,0 +1,23 @@
+# 忽略环境变量（里面有你的API Key，绝对不能传）
+.env
+
+# 忽略虚拟环境
+.venv/
+venv/
+
+# 忽略本地下载的大模型（977MB，太大了，GitHub传不上去）
+models/
+
+# 忽略Python缓存
+__pycache__/
+*.pyc
+
+# Streamlit 上传的临时 PDF 文件
+temp*.pdf
+
+# 本地 IDE 配置（避免把 PyCharm 的个人配置传上去）
+.idea/
+
+# Python 缓存
+__pycache__/
+*.pyc
