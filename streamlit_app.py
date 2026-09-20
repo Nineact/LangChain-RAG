@@ -23,18 +23,18 @@ st.title("🧠 认知健康 AI 智能体 - RAG 问答系统")
 st.caption("上传 PDF 文档，基于文档内容进行问答")
 
 #load
-@st.cache_resource
+@st.cache_resource # run once(avoid unnecessary additional running)
 def load_component():
     embeddings = HuggingFaceEmbeddings(
-        model_name = "D:/Tools/CodeOnPython/models/all-MiniLM-L6-v2"
-    )
+        model_name = "D:/Tools/CodeOnPython/LangChain+RAG/models/all-MiniLM-L6-v2"
+    ) # small local model for processing doc
     llm = ChatOpenAI(
         model="deepseek-chat",
         api_key=os.getenv("DEEPSEEK_API_KEY"),
         base_url="https://api.deepseek.com/",
-    )
+    ) # ds for thinking
     # agent1
-    prompt_extractor = ChatPromptTemplate.from_messages([
+    prompt_extractor = ChatPromptTemplate.from_messages([   # receive a list including conver settings
         ("system",
          "你是一个信息提取专家。请根据以下资料，提取出与用户问题相关的最核心的3个事实，用简短的句子列出。\n\n资料：\n{context}"),
         ("user", "用户问题：{question}")
@@ -52,13 +52,13 @@ embeddings, llm, prompt_extractor, prompt_generator = load_component()
 def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
-def get_history(_):
+def get_history(_): # _占位符, ignore fault input
     history_str = ""
-    if "messages" not in st.session_state:
+    if "messages" not in st.session_state:  # no history, no input, avoid wrong search (?)
         return history_str
-    for msg in st.session_state.messages[:-1]:   # the final one is the new question, uploaded
+    for msg in st.session_state["messages"][:-1]:   # the final one is the new question, uploaded, [-1] not needed
         role = "用户" if msg["role"] == "user" else "助手"
-        history_str += f"{role}: {msg['context']}\n"
+        history_str += f"{role}: {msg['context']}\n" # change to chinese for easier understanding
     return history_str
 
 #upload
@@ -66,10 +66,10 @@ with st.sidebar:
     st.header("📄 上传知识库文档")
     uploaded_file = st.file_uploader("选择一个pdf文件", type=["pdf"])
 
-    if uploaded_file is not None:
-        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
-            tmp.write(uploaded_file.getvalue())
-            tmp_path = tmp.name
+    if uploaded_file is not None: # with to open a doc   # not to delete tempfile when "with" ends
+        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:   # create a temp real file(.pdf) on pc for process
+            tmp.write(uploaded_file.getvalue()) # get content and save in tempfile
+            tmp_path = tmp.name # path for following search
 
         with st.spinner("正在处理文档，请稍候..."):
             loader = PyPDFLoader(tmp_path)
@@ -79,10 +79,10 @@ with st.sidebar:
             splits = text_splitter.split_documents(docs)
 
             vector_store = Chroma.from_documents(documents=splits, embedding=embeddings)
-            retriever = vector_store.as_retriever(search_kwargs = {"k": 3})
+            retriever = vector_store.as_retriever(search_kwargs = {"k": 3}) #use it as a searcher to find 3 similar text
 
-            extractor_chain = (
-                {"context": retriever | format_docs, "question": RunnablePassthrough()}
+            extractor_chain = (         # f_d is a function, without (), only run when in rag, else: run immediately
+                {"context": retriever | format_docs, "question": RunnablePassthrough()} # RP is a class, () to create it
                 | prompt_extractor
                 | llm
                 | StrOutputParser()
@@ -91,7 +91,7 @@ with st.sidebar:
             st.session_state.rag_chain = (
                 {"facts": extractor_chain,
                  "question": RunnablePassthrough(),
-                 "history": get_history}
+                 "history": get_history}    # without (), only run when need to get history
                 | prompt_generator
                 | llm
                 | StrOutputParser()
@@ -101,10 +101,10 @@ with st.sidebar:
 #history
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
-        st.markdown(msg["context"])
+        st.markdown(msg["context"]) # inside content, invisible, mistery for human(doge)
 
 #input
-if prompt_input := st.chat_input("请输入你的问题..."):
+if prompt_input := st.chat_input("请输入你的问题..."): # no running when no input. := decide (is_none) while assigning
     if "rag_chain" not in st.session_state:
         st.warning("请先在左侧上传 PDF 文档，构建知识库。")
     else:
@@ -115,7 +115,7 @@ if prompt_input := st.chat_input("请输入你的问题..."):
         # output
         with st.chat_message("assistant"):
             with st.spinner("思考中..."):
-                answer = st.session_state.rag_chain.invoke(prompt_input)
+                answer = st.session_state.rag_chain.invoke(prompt_input)    # invoke: time to run! rag_chain!
                 st.markdown(answer)
 
-        st.session_state.messages.append({"role": "assistant", "context": answer})
+        st.session_state.messages.append({"role": "assistant", "context": answer}) # add history

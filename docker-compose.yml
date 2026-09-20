@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  rag-app:
+    build: .
+    container_name: rag-app
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    environment:
+      - EMBEDDING_MODEL_PATH=/app/models/all-MiniLM-L6-v2
+    volumes:
+      - ./models:/app/models:ro  # 挂载本地模型目录到容器，只读
+    restart: unless-stopped
+
+#关键点解释：
+#
+#env_file: .env → 把本地的 .env 注入到容器环境变量里。
+#
+#EMBEDDING_MODEL_PATH=/app/models/all-MiniLM-L6-v2 → 告诉容器里的代码，模型在 /app/models 下。
+#
+#volumes: ./models:/app/models:ro → 把宿主机的 models 文件夹挂载到容器里，ro 表示只读（防止容器误删模型）。
