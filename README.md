@@ -70,6 +70,11 @@ uvicorn main:app --reload
 
 然后在浏览器打开 `http://127.0.0.1:8000/docs`，可以在 Swagger UI 中测试 `/ask` 接口。
 
+### 5. 使用 Docker 一键启动（推荐）
+```bash
+docker-compose up --build
+```
+
 ### 接口示例
 
 **请求 POST /ask**
