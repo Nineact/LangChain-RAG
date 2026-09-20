@@ -55,7 +55,7 @@ pip install -r requirements.txt
 在项目根目录新建 `.env` 文件，填入你的 DeepSeek API Key：
 
 ```text
-DEEPSEEK_API_KEY=你的APIKey
+DEEPSEEK_API_KEY=YourAPIKey
 ```
 
 ### 3. 准备本地嵌入模型
@@ -89,7 +89,7 @@ uvicorn main:app --reload
 ```
 
 ### 5. 运行 Streamlit Web 界面（可选）
-streamlit run streamlit_app.py
+streamlit run app.py
 
 ## 📝 备注
 
