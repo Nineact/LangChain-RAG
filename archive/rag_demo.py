@@ -12,7 +12,7 @@ from langchain_core.output_parsers import StrOutputParser
 load_dotenv()
 
 # 1. 加载文档
-loader = TextLoader("knowledge.txt", encoding="utf-8")
+loader = TextLoader("../knowledge.txt", encoding="utf-8")
 docs = loader.load()
 
 # 2. 切分
