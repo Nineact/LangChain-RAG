@@ -61,7 +61,7 @@ def generate_node(state: RAGState):
         "question": state["question"],
         "context": state["context"],
         "history": history_str,
-        "is_satisfied": "满意" if (state["is_satisfied"]) else "不满意"
+        "is_satisfied": "如果之前的回答不满意，请完全改变你的回答角度和表述方式，给出一个全新的、更详细的回答。" if not state["is_satisfied"] else ""
     })
     return {"answer": answer}
 
