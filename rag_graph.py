@@ -105,6 +105,7 @@ workflow.add_conditional_edges(
         "fail": "generator"
     }
 )
+# 可以修改retriever，重新选择文本进行回答
 
 app = workflow.compile()
 
