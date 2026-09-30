@@ -4,7 +4,6 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_chroma import Chroma
-from openai.types import vector_store
 
 from config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL, EMBEDDING_MODEL_PATH
 
@@ -21,7 +20,7 @@ def load_llm(): # load deepseek llm
 def get_prompt():
     return ChatPromptTemplate.from_messages([
         ("system",
-         "你是一个专业的认知健康助手。请严格根据以下资料回答问题，如果资料中没有相关信息，请直接说“根据现有资料无法回答”。\n\n以下是之前的对话历史：\n{history}\n\n原先对话满意度：{is_satisfied}\n\n资料：\n{context}"),
+         "你是一个{identity}\n\n以下是之前的对话历史：\n{history}\n\n原先对话满意度：{is_satisfied}{is_continue}\n\n资料：\n{context}"),
         ("user", "{question}")
     ])
 
